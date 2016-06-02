@@ -9,15 +9,6 @@
 #include "png.h"
 #include "bpng.h"
 
-void bMemImage( bImage *image, void *memory )
-{
-    uint8_t* mem = (uint8_t*)memory;
-    
-    image->width = *(uint32_t*)mem;
-    image->height = *((uint32_t*)(mem+sizeof(uint32_t)));
-    image->data = mem + sizeof(uint32_t)*2;
-}
-
 static void bPNGReadFunc( png_structp pPNG, png_bytep pData, png_size_t length )
 {
     bPNGIOPTR *io = (bPNGIOPTR*)png_get_io_ptr(pPNG);
@@ -95,14 +86,20 @@ static bool bReadPNGData( png_structp pPNG, png_infop pInfo, bImage* image )
     return result;
 }
 
+void bMemImage( bImage *image, void *memory )
+{
+    uint8_t* mem = (uint8_t*)memory;
+    
+    image->width = *(uint32_t*)mem;
+    image->height = *((uint32_t*)(mem+sizeof(uint32_t)));
+    image->data = mem + sizeof(uint32_t)*2;
+}
+
 bool bMemPNG( bImage *image, void *memory, int size )
 {
     bool result = false;
 
     image->width = image->height = 0;
-
-    //png_structp pPNG = png_create_read_struct( PNG_LIBPNG_VER_STRING, 0, 0, 0 );
-    //png_infop pInfo = NULL;
 
     png_structp pPNG;
     png_infop pInfo;
@@ -115,53 +112,6 @@ bool bMemPNG( bImage *image, void *memory, int size )
         bReadPNGData( pPNG, pInfo, image );
         bTearDownPNG( &pPNG, &pInfo );
     }
-        /*if( pPNG )
-    {
-        pInfo = png_create_info_struct( pPNG );
-        if( pInfo )
-        {
-            if( !setjmp( png_jumpbuf( pPNG ) ) )
-            {
-                bPNGIOPTR io = { memory, size, 0 };
-                png_set_read_fn( pPNG, &io, bPNGReadFunc );
-                png_read_info( pPNG, pInfo );
-
-                png_uint_32 width, height;
-                int bitDepth, colorType, interlaceType;
-
-                png_get_IHDR( pPNG, pInfo, &width, &height, &bitDepth, &colorType, &interlaceType, NULL, NULL );
-                png_set_strip_16( pPNG );
-
-                if( colorType == PNG_COLOR_TYPE_PALETTE )
-                    png_set_palette_to_rgb( pPNG );
-                if( colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8 )
-                    png_set_expand_gray_1_2_4_to_8( pPNG );
-                if( png_get_valid( pPNG; pInfo, PNG_INFO_tRNS ) )
-                    png_set_tRNS_to_alpha( pPNG );
-
-                int bpp = 32 / bitDepth;
-                if( height * width * bpp <= (unsigned int)image->size )
-                {
-                    image->size = height * width * bpp;
-                    image->width = width;
-                    image->height = height;
-
-                    png_bytep *rowPointers = (png_bytep*)malloc( height * sizeof(png_bytep) );
-
-                    for( unsigned int i=0; i<height; i++ )
-                        rowPointers[i] = (png_bytep)&image->pixels[i*width*bpp];
-
-                    png_read_image( pPNG, rowPointers );
-                    png_read_end( pPNG, pInfo );
-
-                    free( rowPointers );
-                    result = true;
-                }
-            }
-        }
-
-        png_destroy_read_struct( &pPNG, &pInfo, 0 );
-    }*/
     
     return result;
 }
@@ -185,55 +135,6 @@ bool bReadPNG( const char* filename, bImage* image )
             bReadPNGData( pPNG, pInfo, image );
             bTearDownPNG( &pPNG, &pInfo );
         }
-        
-        /*png_structp pPNG = png_create_read_struct( PNG_LIBPNG_VER_STRING, 0, 0, 0 );
-        png_infop pInfo = NULL;
-        if( pPNG )
-        {
-            pInfo = png_create_info_struct( pPNG );
-            if( pInfo )
-            {
-                if( !setjmp( png_jumpbuf( pPNG ) ) )
-                {
-                    png_init_io( pPNG, file );
-                    png_read_info( pPNG, pInfo );
-
-                    png_uint_32 width, height;
-                    int bitDepth, colorType, interlaceType;
-
-                    png_get_IHDR( pPNG, pInfo, &width, &height, &bitDepth, &colorType, &interlaceType, NULL, NULL );
-                    png_set_strip_16( pPNG );
-
-                    if( colorType == PNG_COLOR_TYPE_PALETTE )
-                        png_set_palette_to_rgb( pPNG );
-                    if( colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8 )
-                        png_set_expand_gray_1_2_4_to_8( pPNG );
-                    if( png_get_valid( pPNG, pInfo, PNG_INFO_tRNS ) )
-                        png_set_tRNS_to_alpha( pPNG );
-
-                    int bpp = 32 / bitDepth;
-                    if( height * width * bpp <= (unsigned int)image->size )
-                    {
-                        image->size = height * width * bpp;
-                        image->width = width;
-                        image->height = height;
-
-                        png_bytep *rowPointers = (png_bytep*)malloc( height * sizeof(png_bytep) );
-
-                        for( unsigned int i=0; i<height; i++ )
-                            rowPointers[i] = (png_bytep)&image->pixels[i*widht*bpp];
-
-                        png_read_image( pPNG, rowPointers );
-                        png_read_end( pPNG, pInfo );
-
-                        free( rowPointers );
-                        result = true;
-                    }
-                }
-            }
-        }
-
-        png_destroy_read_struct( &pPNG, &pInfo, 0 );*/
         
         fclose( file );
     }

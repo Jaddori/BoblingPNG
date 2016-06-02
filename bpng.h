@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <fstream>
+#include <windows.h>
 
 struct bImage
 {
