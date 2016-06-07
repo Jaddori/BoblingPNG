@@ -16,10 +16,16 @@ int main( int argc, char *argv[] )
     image.size = image.width * image.height * 4;
     image.data = malloc( image.size );
 
-    uint8_t colors[] = { 255, 0, 0, 255 };
+    /*uint8_t colors[] = { 255, 0, 0, 255 };
     
     for( int i=0; i<image.size; i++ )
-        *(image.pixels+i) = colors[i%4];
+        *(image.pixels+i) = colors[i%4];*/
+	
+	uint32_t color = 255 << 24 | 255;
+	uint32_t* pixel = (uint32_t*)image.data;
+	
+	for( int i=0; i<image.width*image.height; i++ )
+		*pixel++ = color;
 
     bWritePNG( "test.png", &image );
     
