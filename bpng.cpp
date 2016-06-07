@@ -44,7 +44,7 @@ static void bTearDownPNG( png_structp *pPNG, png_infop *pInfo )
     png_destroy_read_struct( pPNG, pInfo, 0 );
 }
 
-static bool bReadPNGData( png_structp pPNG, png_infop pInfo, bImage* image )
+static bool bReadPNGData( png_structp pPNG, png_infop pInfo, bImage *image )
 {
     bool result = false;
     
@@ -116,38 +116,55 @@ bool bMemPNG( bImage *image, void *memory, int size )
     return result;
 }
 
-bool bReadPNG( const char* filename, bImage* image )
+bool bReadPNG( const char *filename, bImage *image )
+{
+    FILE *file = fopen( filename, "rb" );
+    bool result = bReadPNG( file, image );
+    fclose( file );
+
+    return result;
+}
+
+bool bReadPNG( FILE *file, bImage *image )
 {
     bool result = false;
 
-    image->width = image->height = 0;
-
-    FILE* file = fopen( filename, "rb" );
-    if( file )
+    if( image )
     {
-        png_structp pPNG;
-        png_infop pInfo;
+        image->width = image->height = 0;
 
-        if( bSetupPNG( &pPNG, &pInfo ) )
+        if( file )
         {
-            png_init_io( pPNG, file );
+            png_structp pPNG;
+            png_infop pInfo;
+
+            if( bSetupPNG( &pPNG, &pInfo ) )
+            {
+                png_init_io( pPNG, file );
             
-            bReadPNGData( pPNG, pInfo, image );
-            bTearDownPNG( &pPNG, &pInfo );
+                bReadPNGData( pPNG, pInfo, image );
+                bTearDownPNG( &pPNG, &pInfo );
+            }
         }
-        
-        fclose( file );
     }
     
     return result;
 }
 
-bool bWritePNG( const char* filename, bImage* image )
+bool bWritePNG( const char *filename, bImage *image )
+{
+    FILE *file = fopen( filename, "wb" );
+    bool result = bWritePNG( file, image );
+    fclose( file );
+
+    return result;
+}
+
+bool bWritePNG( FILE *file, bImage *image )
 {
     bool result = false;
 
-    FILE* file = fopen( filename, "wb" );
-    if( file )
+    if( file && image )
     {   
         png_structp pPNG = png_create_write_struct( PNG_LIBPNG_VER_STRING, 0, 0, 0 );
         png_infop pInfo = NULL;
@@ -181,8 +198,6 @@ bool bWritePNG( const char* filename, bImage* image )
 
             png_destroy_write_struct( &pPNG, &pInfo );
         }
-
-        fclose( file );
     }
     
     return result;
