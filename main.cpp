@@ -27,7 +27,7 @@ int main( int argc, char *argv[] )
 	for( int i=0; i<image.width*image.height; i++ )
 		*pixel++ = color;
 
-    bWritePNG( "test.png", &image );
+    bWritePNG( "./test.png", &image );
     
     free( image.data );
 
@@ -38,8 +38,8 @@ int main( int argc, char *argv[] )
     copy.size = copy.width * copy.height * 4;
     copy.data = malloc( copy.size );
 
-    bReadPNG( "test.png", &copy );
-    bWritePNG( "copy.png", &copy ); // prove that it works
+    bReadPNG( "./test.png", &copy );
+    bWritePNG( "./copy.png", &copy ); // prove that it works
 
     free( copy.data );
     

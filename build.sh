@@ -1,0 +1,1 @@
+clang++ -o ../build/BoblingPNG main.cpp bpng.cpp -I ~/Documents/libpng/ -I ~/Documents/zlib/ -L /usr/local/lib/ -lpng -lz
